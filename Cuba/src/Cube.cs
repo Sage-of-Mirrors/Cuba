@@ -15,8 +15,6 @@ namespace Cuba
 
         private int m_VBO;
         private int m_IBO;
-        private int m_ColorUniform;
-        private int m_ModelMatrixUniform;
 
         private float[] m_Vertices = new float[24]
         {
@@ -52,8 +50,9 @@ namespace Cuba
         };
 
         private Matrix4 m_ModelMatrix = Matrix4.Identity;
+        private Vector4 m_Color;
 
-        public Cube(Vector3 translation)
+        public Cube(Vector3 translation, Vector4 color)
         {
             // Generate VBO and IBO buffers
             m_VBO = GL.GenBuffer();
@@ -62,17 +61,13 @@ namespace Cuba
             // Init shader program
             ShaderProgramID = InitShadersAndGetProgram();
 
-            // Grab color and model uniforms
-            m_ColorUniform = GL.GetUniformLocation(ShaderProgramID, "uColor");
-            m_ModelMatrixUniform = GL.GetUniformLocation(ShaderProgramID, "model");
-
             // Apply translation to model matrix
             m_ModelMatrix.M41 = translation.X;
             m_ModelMatrix.M42 = translation.Y;
             m_ModelMatrix.M43 = translation.Z;
 
-            // Upload model matrix to GPU
-            GL.UniformMatrix4(m_ModelMatrixUniform, false, ref m_ModelMatrix);
+            // Set color
+            m_Color = color;
 
             // Bind VBO as an array buffer and upload vertex data
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_VBO);
@@ -88,7 +83,9 @@ namespace Cuba
             // Ensure the proper shader program is bound
             GL.UseProgram(ShaderProgramID);
 
-            GL.Uniform3(m_ColorUniform, 0.945f, 0.745f, 0.356f);
+            // Update UBO with instance-specific data
+            UBOManager.UpdateModelMatrix(m_ModelMatrix);
+            UBOManager.UpdateColor(m_Color);
 
             // Bind VBO
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_VBO);

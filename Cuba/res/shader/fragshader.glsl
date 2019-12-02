@@ -1,9 +1,16 @@
 #version 330 core
 
 out vec4 fragColor;
-uniform vec3 uColor;
+
+layout (std140) uniform Matrices
+{
+    mat4 projection;
+    mat4 view;
+	mat4 model;
+	vec4 color;
+};
 
 void main()
 {
-	fragColor = vec4(uColor, 1.0);
+	fragColor = color;
 }

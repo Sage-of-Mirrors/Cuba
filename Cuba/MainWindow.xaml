@@ -9,7 +9,7 @@
         Title="MainWindow" Height="600" Width="800">
     <Grid>
         <DockPanel LastChildFill="True">
-            <WindowsFormsHost Margin="5" Initialized="WindowsFormsHost_Initialized">
+            <WindowsFormsHost Margin="5">
                 <opentk:GLControl x:Name="glControl" Load="GlControl_Load" Resize="GlControl_Resize"/>
             </WindowsFormsHost>
         </DockPanel>
