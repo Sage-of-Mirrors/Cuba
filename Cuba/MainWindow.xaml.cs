@@ -37,6 +37,7 @@ namespace Cuba
         private void GlControl_Load(object sender, EventArgs e)
         {
             glControl.MakeCurrent();
+            GL.ClearColor(0f, 0.25f, 0.5f, 1.0f);
 
             t.Interval = 16; //ms
             t.Tick += (o, args) =>
@@ -66,7 +67,7 @@ namespace Cuba
 
         private void Render()
         {
-            GL.ClearColor(0.0f, 0.25f, 0.5f, 1.0f);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
 
             c.Render();
             c2.Render();
