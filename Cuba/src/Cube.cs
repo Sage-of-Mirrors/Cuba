@@ -84,8 +84,10 @@ namespace Cuba
             GL.UseProgram(ShaderProgramID);
 
             // Update UBO with instance-specific data
-            UBOManager.UpdateModelMatrix(m_ModelMatrix);
-            UBOManager.UpdateColor(m_Color);
+            UBOManager.MatrixStruct.Model = m_ModelMatrix;
+            UBOManager.MatrixStruct.Color = m_Color;
+
+            UBOManager.UploadUBO();
 
             // Bind VBO
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_VBO);

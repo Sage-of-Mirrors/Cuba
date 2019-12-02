@@ -60,8 +60,8 @@ namespace Cuba
             Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(45.0f * ((float)Math.PI / 180.0f), 4 / 3.0f, 0.01f, 1000000.0f);
             Matrix4 view = Matrix4.LookAt(new Vector3(0, 0, -10), Vector3.UnitZ, Vector3.UnitY);
 
-            UBOManager.UpdateProjectionMatrix(projection);
-            UBOManager.UpdateViewMatrix(view);
+            UBOManager.MatrixStruct.Projection = projection;
+            UBOManager.MatrixStruct.View = view;
         }
 
         private void Render()

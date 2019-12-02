@@ -8,53 +8,19 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Cuba
 {
+    public struct Matrices
+    {
+        public Matrix4 Projection;
+        public Matrix4 View;
+        public Matrix4 Model;
+        public Vector4 Color;
+    }
+
     public static class UBOManager
     {
         public static int UBOID = -1;
 
-        public static void UpdateProjectionMatrix(Matrix4 proj)
-        {
-            if (UBOID < 0)
-            {
-                return;
-            }
-
-            GL.BindBuffer(BufferTarget.UniformBuffer, UBOID);
-            GL.BufferSubData(BufferTarget.UniformBuffer, IntPtr.Zero, 64, ref proj);
-        }
-
-        public static void UpdateViewMatrix(Matrix4 view)
-        {
-            if (UBOID < 0)
-            {
-                return;
-            }
-
-            GL.BindBuffer(BufferTarget.UniformBuffer, UBOID);
-            GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr)64, 64, ref view);
-        }
-
-        public static void UpdateModelMatrix(Matrix4 model)
-        {
-            if (UBOID < 0)
-            {
-                return;
-            }
-
-            GL.BindBuffer(BufferTarget.UniformBuffer, UBOID);
-            GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr)128, 64, ref model);
-        }
-
-        public static void UpdateColor(Vector4 color)
-        {
-            if (UBOID < 0)
-            {
-                return;
-            }
-
-            GL.BindBuffer(BufferTarget.UniformBuffer, UBOID);
-            GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr)192, 16, ref color);
-        }
+        public static Matrices MatrixStruct;
 
         public static void LinkUBO(Cube c)
         {
@@ -63,6 +29,17 @@ namespace Cuba
 
             // Set the Matrices block in the shader program to bind point 0.
             GL.UniformBlockBinding(c.ShaderProgramID, uniformIndex1, 0);
+        }
+
+        public static void UploadUBO()
+        {
+            if (UBOID < 0)
+            {
+                return;
+            }
+
+            GL.BindBuffer(BufferTarget.UniformBuffer, UBOID);
+            GL.BufferData(BufferTarget.UniformBuffer, 208, ref MatrixStruct, BufferUsageHint.StaticDraw);
         }
 
         static UBOManager()
