@@ -8,7 +8,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Cuba
 {
-    public class UBOManager
+    public static class UBOManager
     {
         public static int UBOID = -1;
 
