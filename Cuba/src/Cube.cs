@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Cuba
 {
@@ -49,8 +50,8 @@ namespace Cuba
             6, 7, 4
         };
 
-        private Matrix4 m_ModelMatrix = Matrix4.Identity;
-        private Vector4 m_Color;
+        public Matrix4 ModelMatrix;
+        public Vector4 Color;
 
         public Cube(Vector3 translation, Vector4 color)
         {
@@ -61,13 +62,15 @@ namespace Cuba
             // Init shader program
             ShaderProgramID = InitShadersAndGetProgram();
 
+            ModelMatrix = Matrix4.Identity;
+
             // Apply translation to model matrix
-            m_ModelMatrix.M41 = translation.X;
-            m_ModelMatrix.M42 = translation.Y;
-            m_ModelMatrix.M43 = translation.Z;
+            ModelMatrix.M41 = translation.X;
+            ModelMatrix.M42 = translation.Y;
+            ModelMatrix.M43 = translation.Z;
 
             // Set color
-            m_Color = color;
+            Color = color;
 
             // Bind VBO as an array buffer and upload vertex data
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_VBO);
@@ -78,16 +81,13 @@ namespace Cuba
             GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(4 * m_Indices.Length), m_Indices, BufferUsageHint.StaticDraw);
         }
 
-        public void Render()
+        public void Render(int UBOID, int offset)
         {
             // Ensure the proper shader program is bound
             GL.UseProgram(ShaderProgramID);
 
-            // Update UBO with instance-specific data
-            UBOManager.MatrixStruct.Model = m_ModelMatrix;
-            UBOManager.MatrixStruct.Color = m_Color;
-
-            UBOManager.UploadUBO();
+            GL.BindBuffer(BufferTarget.UniformBuffer, 0);
+            GL.BindBufferRange(BufferRangeTarget.UniformBuffer, 0, UBOID, (IntPtr)offset, Marshal.SizeOf(typeof(Matrices)));
 
             // Bind VBO
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_VBO);

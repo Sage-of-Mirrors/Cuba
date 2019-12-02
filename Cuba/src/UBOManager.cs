@@ -5,15 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System.Runtime.InteropServices;
 
 namespace Cuba
 {
+    [StructLayout(LayoutKind.Explicit, Size = 256)]
     public struct Matrices
     {
-        public Matrix4 Projection;
-        public Matrix4 View;
-        public Matrix4 Model;
-        public Vector4 Color;
+        [FieldOffset(0)] public Matrix4 Projection;
+        [FieldOffset(64)] public Matrix4 View;
+        [FieldOffset(128)] public Matrix4 Model;
+        [FieldOffset(192)] public Vector4 Color;
     }
 
     public static class UBOManager

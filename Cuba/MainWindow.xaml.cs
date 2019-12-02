@@ -25,52 +25,99 @@ namespace Cuba
     /// </summary>
     public partial class MainWindow : Window
     {
+        Camera cam = new Camera();
         Timer t = new Timer();
-        Cube c;
-        Cube c2;
+
+        List<Cube> Cubes = new List<Cube>();
+        private int UBOID;
 
         public MainWindow()
         {
             InitializeComponent();
+            Cubes = new List<Cube>();
         }
 
         private void GlControl_Load(object sender, EventArgs e)
         {
             glControl.MakeCurrent();
+            glControl.MouseWheel += GlControl_MouseWheel;
             GL.ClearColor(0f, 0.25f, 0.5f, 1.0f);
 
             t.Interval = 16; //ms
             t.Tick += (o, args) =>
             {
+                Update();
                 Render();
             };
             t.Enabled = true;
 
-            c = new Cube(new Vector3(1, 0, 0), new Vector4(1.0f, 0.25f, 0.25f, 1.0f));
-            c2 = new Cube(new Vector3(-1, 0, 0), new Vector4(0.25f, 1.0f, 0.25f, 1.0f));
+            Cubes.Add(new Cube(new Vector3(1, 0, 0), new Vector4(1.0f, 0.25f, 0.25f, 1.0f)));
+            Cubes.Add(new Cube(new Vector3(-1, 0, 0), new Vector4(0.25f, 1.0f, 0.25f, 1.0f)));
 
-            UBOManager.LinkUBO(c);
-            UBOManager.LinkUBO(c2);
+            GenerateUBO();
 
-            InitMatrices();
+            foreach (Cube c in Cubes)
+            {
+                // Get the index to the Matrices block for the shader program
+                int uniformIndex1 = GL.GetUniformBlockIndex(c.ShaderProgramID, "Matrices");
+
+                // Set the Matrices block in the shader program to bind point 0.
+                GL.UniformBlockBinding(c.ShaderProgramID, uniformIndex1, 0);
+            }
         }
 
-        private void InitMatrices()
+        private void GlControl_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            // Create projection and view matrices
-            Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(45.0f * ((float)Math.PI / 180.0f), 4 / 3.0f, 0.01f, 1000000.0f);
-            Matrix4 view = Matrix4.LookAt(new Vector3(0, 0, -10), Vector3.UnitZ, Vector3.UnitY);
+            cam.HandleScroll(e.Delta);
+        }
 
-            UBOManager.MatrixStruct.Projection = projection;
-            UBOManager.MatrixStruct.View = view;
+        private int GenerateUBO()
+        {
+            int size = Cubes.Count * Marshal.SizeOf(typeof(Matrices));
+            int test = 0;
+            GL.GetInteger(GetPName.UniformBufferOffsetAlignment, out test);
+
+            // Generate buffer for Uniform Buffer Object
+            UBOID = GL.GenBuffer();
+
+            // Bind to the generated buffer and allocate the necessary memory.
+            GL.BindBuffer(BufferTarget.UniformBuffer, UBOID);
+            GL.BufferData(BufferTarget.UniformBuffer, size, IntPtr.Zero, BufferUsageHint.StaticDraw);
+
+            // Bind to bind point 0 and make it a mirror of the uniform buffer (?)
+            GL.BindBuffer(BufferTarget.UniformBuffer, 0);
+            GL.BindBufferRange(BufferRangeTarget.UniformBuffer, 0, UBOID, IntPtr.Zero, size);
+
+            return UBOID;
+        }
+
+        private void Update()
+        {
+            Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(cam.Fovy * ((float)Math.PI / 180.0f), 4 / 3.0f, 0.01f, 1000000.0f);
+
+            Matrices[] mats = new Matrices[Cubes.Count];
+
+            for (int i = 0; i < Cubes.Count; i++)
+            {
+                mats[i] = new Matrices()
+                {
+                    Projection = projection,
+                    View = cam.ViewMatrix,
+                    Model = Cubes[i].ModelMatrix,
+                    Color = Cubes[i].Color
+                };
+            }
+
+            GL.BindBuffer(BufferTarget.UniformBuffer, UBOID);
+            GL.BufferSubData(BufferTarget.UniformBuffer, IntPtr.Zero, Cubes.Count * Marshal.SizeOf(typeof(Matrices)), mats);
         }
 
         private void Render()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            c.Render();
-            c2.Render();
+            Cubes[0].Render(UBOID, 0);
+            Cubes[1].Render(UBOID, Marshal.SizeOf(typeof(Matrices)));
 
             glControl.SwapBuffers();
         }
@@ -78,6 +125,26 @@ namespace Cuba
         private void GlControl_Resize(object sender, EventArgs e)
         {
             GL.Viewport(0, 0, glControl.Width, glControl.Height);
+        }
+
+        private void WindowsFormsHost_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            cam.HandleInput(e.Key);
+        }
+
+        private void WindowsFormsHost_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            int test = e.Delta;
+        }
+
+        private void WindowsFormsHost_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+
+        }
+
+        private void GlControl_Scroll(object sender, ScrollEventArgs e)
+        {
+
         }
     }
 }
