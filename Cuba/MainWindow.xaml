@@ -9,8 +9,8 @@
         Title="MainWindow" Height="600" Width="800">
     <Grid>
         <DockPanel LastChildFill="True">
-            <WindowsFormsHost Margin="5" KeyDown="WindowsFormsHost_KeyDown" MouseWheel="WindowsFormsHost_MouseWheel" PreviewMouseWheel="WindowsFormsHost_PreviewMouseWheel">
-                <opentk:GLControl x:Name="glControl" Load="GlControl_Load" Resize="GlControl_Resize" Scroll="GlControl_Scroll"/>
+            <WindowsFormsHost Margin="5" KeyDown="WindowsFormsHost_KeyDown">
+                <opentk:GLControl x:Name="glControl" Load="GlControl_Load" Resize="GlControl_Resize"/>
             </WindowsFormsHost>
         </DockPanel>
     </Grid>

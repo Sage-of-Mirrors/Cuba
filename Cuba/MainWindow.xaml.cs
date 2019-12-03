@@ -40,7 +40,10 @@ namespace Cuba
         private void GlControl_Load(object sender, EventArgs e)
         {
             glControl.MakeCurrent();
+
             glControl.MouseWheel += GlControl_MouseWheel;
+            glControl.MouseMove += GlControl_MouseMove;
+
             GL.ClearColor(0f, 0.25f, 0.5f, 1.0f);
 
             t.Interval = 16; //ms
@@ -64,11 +67,6 @@ namespace Cuba
                 // Set the Matrices block in the shader program to bind point 0.
                 GL.UniformBlockBinding(c.ShaderProgramID, uniformIndex1, 0);
             }
-        }
-
-        private void GlControl_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            cam.HandleScroll(e.Delta);
         }
 
         private int GenerateUBO()
@@ -132,19 +130,19 @@ namespace Cuba
             cam.HandleInput(e.Key);
         }
 
-        private void WindowsFormsHost_MouseWheel(object sender, MouseWheelEventArgs e)
+        private void GlControl_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            int test = e.Delta;
+            cam.HandleScroll(e.Delta);
         }
 
-        private void WindowsFormsHost_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private void GlControl_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            if (e.Button != MouseButtons.Left)
+            {
+                return;
+            }
 
-        }
-
-        private void GlControl_Scroll(object sender, ScrollEventArgs e)
-        {
-
+            cam.HandleRotate(e);
         }
     }
 }

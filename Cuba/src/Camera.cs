@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 using System.Windows.Input;
+using System.Drawing;
 
 namespace Cuba
 {
@@ -17,7 +18,9 @@ namespace Cuba
         public Vector3 Target { get; private set; }
         public Vector3 Up { get; private set; }
         public Vector3 Right { get; private set; }
-        public Vector3 Forward { get; private set; }
+        public Vector3 Forward { get { return Vector3.Cross(Right, Up); } }
+
+        private Point m_prevPoint;
 
         public Matrix4 ViewMatrix
         {
@@ -31,57 +34,68 @@ namespace Cuba
 
             Up = Vector3.UnitY;
             Right = Vector3.UnitX;
-            Forward = Vector3.UnitZ;
 
             Fovy = 45.0f;
         }
 
         public void HandleInput(Key key)
         {
+            Vector3 direction = Vector3.Zero;
+
             switch (key)
             {
                 case Key.W:
-                    Eye = new Vector3(Eye.X, Eye.Y, Eye.Z + SPEED);
-                    Target = new Vector3(Target.X, Target.Y, Target.Z + SPEED);
-                    break;
-                case Key.A:
-                    Eye = new Vector3(Eye.X + SPEED, Eye.Y, Eye.Z);
-                    Target = new Vector3(Target.X + SPEED, Target.Y, Target.Z);
-                    break;
-                case Key.D:
-                    Eye = new Vector3(Eye.X - SPEED, Eye.Y, Eye.Z);
-                    Target = new Vector3(Target.X - SPEED, Target.Y, Target.Z);
+                    direction += SPEED * Forward;
                     break;
                 case Key.S:
-                    Eye = new Vector3(Eye.X, Eye.Y, Eye.Z - SPEED);
-                    Target = new Vector3(Target.X, Target.Y, Target.Z - SPEED);
+                    direction -= SPEED * Forward;
+                    break;
+                case Key.A:
+                    direction += SPEED * Right;
+                    break;
+                case Key.D:
+                    direction -= SPEED * Right;
                     break;
                 case Key.Q:
-                    Eye = new Vector3(Eye.X, Eye.Y + SPEED, Eye.Z);
-                    Target = new Vector3(Target.X, Target.Y + SPEED, Target.Z);
+                    direction += SPEED * Up;
                     break;
                 case Key.E:
-                    Eye = new Vector3(Eye.X, Eye.Y - SPEED, Eye.Z);
-                    Target = new Vector3(Target.X, Target.Y - SPEED, Target.Z);
+                    direction -= SPEED * Up;
                     break;
             }
+
+            Eye += direction;
+            Target += direction;
         }
 
         public void HandleScroll(int delta)
         {
-            float change = delta / 5 * SPEED;
+            Vector3 direction = (delta / 150.0f * SPEED) * Forward;
 
-            Fovy += (-change) * (float)(Math.PI / 180.0f);
+            Eye += direction;
+            Target += direction;
+        }
 
-            if (Fovy >= 180.0f)
-            {
-                Fovy = 179.99f;
-            }
+        public void HandleRotate(System.Windows.Forms.MouseEventArgs e)
+        {
+            float delta_x = e.X - m_prevPoint.X;
+            float delta_y = e.Y - m_prevPoint.Y;
 
-            if (Fovy <= 0)
-            {
-                Fovy = 0.01f;
-            }
+            delta_y /= 220.0f;
+            delta_x /= 220.0f;
+
+            Matrix3 test;
+            Matrix3.CreateRotationX(delta_y, out test);
+
+            Matrix3 test2;
+            Matrix3.CreateRotationY(delta_x, out test2);
+
+            Up = Vector3.Transform(Up, test).Normalized();
+            Right = Vector3.Transform(Right, test2).Normalized();
+
+            Target = Vector3.Cross(Up, Right);
+
+            m_prevPoint = e.Location;
         }
     }
 }
