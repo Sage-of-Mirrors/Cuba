@@ -27,9 +27,12 @@ namespace Cuba
     {
         Camera cam = new Camera();
         Timer t = new Timer();
+        float counter = 0.0f;
 
         List<Cube> Cubes = new List<Cube>();
         private int UBOID;
+
+        private Light l;
 
         public MainWindow()
         {
@@ -54,10 +57,16 @@ namespace Cuba
             };
             t.Enabled = true;
 
-            Cubes.Add(new Cube(new Vector3(1, 0, 0), new Vector4(1.0f, 0.25f, 0.25f, 1.0f)));
-            Cubes.Add(new Cube(new Vector3(-1, 0, 0), new Vector4(0.25f, 1.0f, 0.25f, 1.0f)));
+            Cubes.Add(new Cube(new Vector3(1, 0, 0), Vector4.One));//new Vector4(1.0f, 0.25f, 0.25f, 1.0f)));
+            Cubes.Add(new Cube(new Vector3(-1, 0, 0), Vector4.One));//new Vector4(0.25f, 1.0f, 0.25f, 1.0f)));
 
             GenerateUBO();
+
+            l = new Light();
+            l.Position = new Vector4(0, 0, 1, 0);
+            l.Color = new Vector4(1, 1, 1, 1);
+            l.Attenuation = 1.0f;
+            l.AmbientCoefficient = .5f;
 
             foreach (Cube c in Cubes)
             {
@@ -72,8 +81,6 @@ namespace Cuba
         private int GenerateUBO()
         {
             int size = Cubes.Count * Marshal.SizeOf(typeof(Matrices));
-            int test = 0;
-            GL.GetInteger(GetPName.UniformBufferOffsetAlignment, out test);
 
             // Generate buffer for Uniform Buffer Object
             UBOID = GL.GenBuffer();
@@ -95,6 +102,10 @@ namespace Cuba
 
             Matrices[] mats = new Matrices[Cubes.Count];
 
+            l.Position = new Vector4((float)Math.Sin(counter), (float)Math.Cos(counter), (float)-Math.Sin(counter), 1).Normalized();
+            //l.Color = new Vector4((float)Math.Sin(counter), (float)Math.Cos(counter), (float)-Math.Sin(counter), 1);
+            counter += 0.1f;
+
             for (int i = 0; i < Cubes.Count; i++)
             {
                 mats[i] = new Matrices()
@@ -102,7 +113,8 @@ namespace Cuba
                     Projection = projection,
                     View = cam.ViewMatrix,
                     Model = Cubes[i].ModelMatrix,
-                    Color = Cubes[i].Color
+                    Color = Cubes[i].Color,
+                    Light = l
                 };
             }
 
@@ -113,6 +125,8 @@ namespace Cuba
         private void Render()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
 
             Cubes[0].Render(UBOID, 0);
             Cubes[1].Render(UBOID, Marshal.SizeOf(typeof(Matrices)));
@@ -127,6 +141,11 @@ namespace Cuba
 
         private void WindowsFormsHost_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            if (e.Key == Key.L)
+            {
+                l.Position = -l.Position;
+            }
+
             cam.HandleInput(e.Key);
         }
 

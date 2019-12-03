@@ -15,39 +15,130 @@ namespace Cuba
         public int ShaderProgramID { get; private set; }
 
         private int m_VBO;
+        private int m_NBO;
         private int m_IBO;
 
-        private float[] m_Vertices = new float[24]
+        private float[] m_Vertices = new float[108]
         {
-            0.5f, 0.5f, 0.5f,
-           -0.5f, 0.5f, 0.5f,
             -0.5f, 0.5f, -0.5f,
+            -0.5f, 0.5f, 0.5f,
+             0.5f, 0.5f, 0.5f,
+
+            0.5f, 0.5f, 0.5f,
+            0.5f, 0.5f, -0.5f,
+           -0.5f, 0.5f, -0.5f,
+
+            -0.5f, 0.5f, 0.5f,
+            0.5f, -0.5f, 0.5f,
+            0.5f, 0.5f, 0.5f,
+
+            -0.5f, -0.5f, 0.5f,
+            0.5f, -0.5f, 0.5f,
+            -0.5f, 0.5f, 0.5f,
+
+            -0.5f, 0.5f, -0.5f,
+            -0.5f, -0.5f, 0.5f,
+            -0.5f, 0.5f, 0.5f,
+
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f, 0.5f,
+            -0.5f, 0.5f, -0.5f,
+
+            0.5f, 0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, 0.5f, -0.5f,
+            
+            0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            0.5f, 0.5f, -0.5f,
+
+            0.5f, -0.5f, -0.5f,
             0.5f, 0.5f, -0.5f,
             0.5f, -0.5f, 0.5f,
+
+            0.5f, -0.5f, 0.5f,
+            0.5f, 0.5f, -0.5f,
+            0.5f, 0.5f, 0.5f,
+
             -0.5f, -0.5f, 0.5f,
             -0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f
+             0.5f, -0.5f, 0.5f,
+
+            0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, 0.5f,
+           -0.5f, -0.5f, -0.5f,
+        };
+
+        private float[] m_Normals = new float[108]
+        {
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f
         };
 
         private uint[] m_Indices = new uint[36]
         {
             0, 1, 2,
-            2, 3, 0,
+            3, 4, 5,
 
-            0, 1, 4,
-            1, 5, 4,
+            6, 7, 8,
+            9, 10, 11,
 
-            1, 2, 5,
-            2, 6, 5,
+            12, 13, 14,
+            15, 16, 17,
 
-            2, 3, 6,
-            3, 7, 6,
+            18, 19, 20,
+            21, 22, 23,
 
-            3, 7, 4,
-            3, 4, 0,
+            24, 25, 26,
+            27, 28, 29,
 
-            4, 5, 6,
-            6, 7, 4
+            30, 31, 32,
+            33, 34, 35
         };
 
         public Matrix4 ModelMatrix;
@@ -57,6 +148,7 @@ namespace Cuba
         {
             // Generate VBO and IBO buffers
             m_VBO = GL.GenBuffer();
+            m_NBO = GL.GenBuffer();
             m_IBO = GL.GenBuffer();
 
             // Init shader program
@@ -75,6 +167,10 @@ namespace Cuba
             // Bind VBO as an array buffer and upload vertex data
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_VBO);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(12 * m_Vertices.Length), m_Vertices, BufferUsageHint.StaticDraw);
+
+            // Bind VBO as an array buffer and upload vertex data
+            GL.BindBuffer(BufferTarget.ArrayBuffer, m_NBO);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(12 * m_Normals.Length), m_Normals, BufferUsageHint.StaticDraw);
 
             // Bind IBO as an element array buffer and upload index data
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_IBO);
@@ -98,6 +194,13 @@ namespace Cuba
             // and they start at offset 0.
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 12, 0);
 
+            GL.BindBuffer(BufferTarget.ArrayBuffer, m_NBO);
+            GL.EnableVertexAttribArray(1);
+            // Tell the GPU about the position data.
+            // Index 0, there are 3 elements, the elements are made of floats, they're not normalized, a single element is 12 bytes long,
+            // and they start at offset 0.
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 12, 0);
+
             // Bind IBO
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_IBO);
 
@@ -105,6 +208,7 @@ namespace Cuba
             GL.DrawElements(BeginMode.Triangles, 12 * 3, DrawElementsType.UnsignedInt, 0);
 
             GL.DisableVertexAttribArray(0);
+            GL.DisableVertexAttribArray(1);
         }
 
         private int InitShadersAndGetProgram()

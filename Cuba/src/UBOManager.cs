@@ -16,6 +16,7 @@ namespace Cuba
         [FieldOffset(64)] public Matrix4 View;
         [FieldOffset(128)] public Matrix4 Model;
         [FieldOffset(192)] public Vector4 Color;
+        [FieldOffset(208)] public Light Light;
     }
 
     public static class UBOManager

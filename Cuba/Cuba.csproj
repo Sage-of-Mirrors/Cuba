@@ -65,6 +65,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="src\Camera.cs" />
+    <Compile Include="src\Light.cs" />
     <Compile Include="src\UBOManager.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
